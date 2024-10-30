@@ -12,11 +12,14 @@ class Tabuleiro:
               for j in range(x*y)]
 
     def get_num(self, x, y):
-        return (x * self._x) + y
+        return x + (self._x * y)
     
-    def connect(self, x, y):
-        self._con[x][y] = "O"
-        self._con[y][x] = "O"
+    def connect(self, x, y, z, w):
+        pa = self.get_num(x, y)
+        pb = self.get_num(z, w)
+        print(pa, pb)
+        self._con[pa][pb] = "O"
+        self._con[pb][pa] = "O"
 
     def __str__(self):
 
