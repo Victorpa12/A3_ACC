@@ -7,10 +7,12 @@ HOST = '127.0.0.1'
 PORT = 65432
 
 # Inicializa o servidor
-server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
+server.listen()
 
 print(f"Servidor iniciado. Aguardando conexão em {HOST}:{PORT}...")
+conn, addr = server.accept()
 print(f"Conexão recebida de {addr}")
 
 # Defina as classes do jogo, como 'Cell', etc.
