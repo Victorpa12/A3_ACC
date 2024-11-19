@@ -1,103 +1,89 @@
 import socket
-import threading
+import pickle
+import pygame
 
-class JogoDotsAndBoxes:
-    def __init__(self):
-        self.jogadores = []
-        self.tamanho = 5  # Definindo o tamanho do tabuleiro
-        self.tabuleiro = [[' ' for _ in range(self.tamanho)] for _ in range(self.tamanho)]
+# Definições de rede
+HOST = '127.0.0.1'
+PORT = 65432
 
-    def adicionar_jogador(self, jogador):
-        if len(self.jogadores) < 2:
-            self.jogadores.append(jogador)
-            return True
-        return False
+# Inicializa o servidor
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((HOST, PORT))
+server.listen()
 
-    def jogar(self, linha, coluna, jogador):
-        # Verifica se a linha e a coluna estão dentro dos limites
-        if 0 <= linha < self.tamanho and 0 <= coluna < self.tamanho:
-            if self.tabuleiro[linha][coluna] == ' ':
-                self.tabuleiro[linha][coluna] = jogador
-                return True
-            else:
-                print("Posição já ocupada.")
-                return False
-        else:
-            print("Movimento fora dos limites!")
-            return False
+print(f"Servidor iniciado. Aguardando conexão em {HOST}:{PORT}...")
+conn, addr = server.accept()
+print(f"Conexão recebida de {addr}")
 
-    def verificar_vencedor(self):
-        # Lógica para verificar se o jogo acabou ou se há um vencedor
-        return None
+# Defina as classes do jogo, como 'Cell', etc.
+class Cell:
+    def __init__(self, r, c):
+        self.r = r
+        self.c = c
+        self.index = self.r * 5 + self.c  # 5 linhas e colunas no exemplo
+        self.rect = pygame.Rect((self.c*40 + 20, self.r*40 + 20, 40, 40))
+        self.sides = [False, False, False, False]  # Cima, direita, baixo, esquerda
+        self.winner = None
+        self.color = (0, 0, 0)
+        self.text = None
 
-class Servidor:
-    def __init__(self, host="localhost", porta=5555):
-        self.host = host
-        self.porta = porta
-        self.servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.jogos = {}
-        self.fila_espera = []
-    
-    def iniciar(self):
-        self.servidor.bind((self.host, self.porta))
-        self.servidor.listen(5)
-        print(f"Servidor iniciado em {self.host}:{self.porta}")
+    def checkwin(self, winner):
+        if all(self.sides) and not self.winner:
+            self.winner = winner
+            self.color = (0, 255, 0) if winner == 'X' else (255, 0, 0)
+            return 1
+        return 0
 
-        while True:
-            cliente, endereco = self.servidor.accept()
-            print(f"Nova conexão de {endereco}")
-            thread_cliente = threading.Thread(target=self.tratar_cliente, args=(cliente,))
-            thread_cliente.start()
+    def update(self, win):
+        if self.winner:
+            pygame.draw.rect(win, self.color, self.rect)
+            win.blit(self.text, (self.rect.centerx-5, self.rect.centery-7))
 
-    def tratar_cliente(self, cliente):
-        jogador = cliente.recv(1024).decode()  # Recebe nome do jogador
-        print(f"Jogador {jogador} conectado.")
+        for index, side in enumerate(self.sides):
+            if side:
+                pygame.draw.line(win, (255, 255, 255), (self.rect.topleft), (self.rect.bottomright), 2)
 
-        if len(self.fila_espera) == 0:
-            self.fila_espera.append((cliente, jogador))
-            cliente.send("Aguardando outro jogador...".encode())
-        else:
-            oponente_cliente, oponente_nome = self.fila_espera.pop(0)
-            jogo = JogoDotsAndBoxes()
-            jogo.adicionar_jogador(jogador)
-            jogo.adicionar_jogador(oponente_nome)
+def create_cells():
+    cells = []
+    for r in range(5):
+        for c in range(5):
+            cells.append(Cell(r, c))
+    return cells
 
-            self.jogos[jogador] = jogo
-            self.jogos[oponente_nome] = jogo
+# Estado inicial do jogo
+cells = create_cells()
+turn = 0
+players = ['X', 'O']
 
-            oponente_cliente.send("Iniciando partida...".encode())
-            cliente.send("Iniciando partida...".encode())
-            threading.Thread(target=self.partida, args=(cliente, oponente_cliente, jogo)).start()
+def send_game_state():
+    """Envia o estado do jogo para o cliente"""
+    game_state = {
+        "cells": cells,
+        "turn": turn,
+        "player_id": players[turn]
+    }
+    conn.send(pickle.dumps(game_state))
 
-    def partida(self, cliente1, cliente2, jogo):
-        while True:
-            # Jogador 1 faz sua jogada
-            cliente1.send("Sua vez: Faça um movimento no formato linha,coluna".encode())
-            movimento = cliente1.recv(1024).decode()
-            linha, coluna = map(int, movimento.split(','))
-    
-            if jogo.jogar(linha, coluna, 'X'):
-                cliente2.send(f"O jogador {jogo.jogadores[0]} jogou na posição {linha},{coluna}".encode())
-                cliente1.send("Movimento realizado com sucesso.".encode())
-                # Aqui você pode adicionar lógica para verificar se o jogo acabou
-            else:
-                cliente1.send("Movimento inválido! Tente novamente.".encode())
-                continue  # Retorna para o começo do loop para que o jogador tente novamente
-    
-            # Jogador 2 faz sua jogada
-            cliente2.send("Sua vez: Faça um movimento no formato linha,coluna".encode())
-            movimento = cliente2.recv(1024).decode()
-            linha, coluna = map(int, movimento.split(','))
-    
-            if jogo.jogar(linha, coluna, 'O'):
-                cliente1.send(f"O jogador {jogo.jogadores[1]} jogou na posição {linha},{coluna}".encode())
-                cliente2.send("Movimento realizado com sucesso.".encode())
-                # Aqui você pode adicionar lógica para verificar se o jogo acabou
-            else:
-                cliente2.send("Movimento inválido! Tente novamente.".encode())
-                continue  # Retorna para o começo do loop para que o jogador tente novamente
+while True:
+    data = conn.recv(4096)
+    if data:
+        move = pickle.loads(data)  # Recebe a jogada
+        index = move["index"]
+        direction = move["direction"]
 
-# Inicializando o servidor
-if __name__ == "__main__":
-    servidor = Servidor()
-    servidor.iniciar()
+        # Atualiza a jogada no jogo (marcando o lado da célula)
+        cell = cells[index]
+        if direction == "up":
+            cell.sides[0] = True
+        elif direction == "right":
+            cell.sides[1] = True
+        elif direction == "down":
+            cell.sides[2] = True
+        elif direction == "left":
+            cell.sides[3] = True
+
+        # Alterna o turno
+        turn = (turn + 1) % 2
+
+        # Envia o estado do jogo para o cliente
+        send_game_state()
