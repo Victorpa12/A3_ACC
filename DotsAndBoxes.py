@@ -220,7 +220,7 @@ while running:
 		winner_img = font.render(f'Jogador {winner} venceu', True, GREEN)
 		win.blit(winner_img, (rect.centerx-winner_img.get_width()/2, rect.centery- 10))
 
-		msg = 'Aperte r:reiniciar, q:sair'
+		msg = 'Aperte r:reiniciar ou q:sair'
 		msgimg = font.render(msg, True, RED)
 		win.blit(msgimg, (rect.centerx-msgimg.get_width()/2, rect.centery + 20))
 
