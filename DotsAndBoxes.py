@@ -191,16 +191,22 @@ while running:
 
     # Exibe mensagem de fim de jogo
     if gameover:
-        rect = pygame.Rect(50, 100, WIDTH - 100, HEIGHT - 200)  # Define o retângulo da mensagem de fim de jogo
+        rect = pygame.Rect(50, 100, WIDTH - 50, HEIGHT - 100)  # Define o retângulo da mensagem de fim de jogo
         pygame.draw.rect(win, BLACK, rect)  # Desenha o retângulo da mensagem
         pygame.draw.rect(win, RED, rect, 2)  # Desenha a borda do retângulo
+
         over = font.render('Fim de Jogo', True, WHITE)  # Renderiza o texto "Fim de Jogo"
         winner = '1' if p1_score > p2_score else '2'  # Define o vencedor
         winner_img = font.render(f'Jogador {winner} venceu!', True, GREEN)  # Renderiza o texto do vencedor
-        msg = font.render('Pressione R para reiniciar', True, RED)  # Renderiza a mensagem de reinício
-        win.blit(over, (rect.centerx - over.get_width() // 2, rect.y + 20))  # Desenha o texto "Fim de Jogo"
-        win.blit(winner_img, (rect.centerx - winner_img.get_width() // 2, rect.centery - 20))  # Desenha o texto do vencedor
-        win.blit(msg, (rect.centerx - msg.get_width() // 2, rect.bottom - 40))  # Desenha a mensagem de reinício
+
+        msg_restart = font.render('Pressione R para reiniciar', True, RED)  # Renderiza a mensagem de reinício
+        msg_exit = font.render('Pressione ESC para sair', True, RED)  # Renderiza a mensagem de saída
+
+        # Centraliza e exibe as mensagens no retângulo
+        win.blit(over, (rect.centerx - over.get_width() // 2, rect.y + 20))  # "Fim de Jogo"
+        win.blit(winner_img, (rect.centerx - winner_img.get_width() // 2, rect.centery - 40))  # "Jogador X venceu!"
+        win.blit(msg_restart, (rect.centerx - msg_restart.get_width() // 2, rect.centery + 10))  # "Pressione R para reiniciar"
+        win.blit(msg_exit, (rect.centerx - msg_exit.get_width() // 2, rect.centery + 40))  # "Pressione ESC para sair"
 
     pygame.draw.rect(win, WHITE, (0, 0, WIDTH, HEIGHT), 2)  # Desenha a borda da tela
     pygame.display.update()  # Atualiza a tela
