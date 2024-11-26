@@ -8,7 +8,7 @@ PADDING = 20  # Espaçamento
 ROWS = COLS = (WIDTH - 4 * PADDING) // CELLSIZE  # Número de linhas e colunas
 
 pygame.init()  # Inicializa o pygame
-win = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)  # Cria a janela do jogo
+win = pygame.display.set_mode([WIDTH, HEIGHT])  # Cria a janela do jogo
 
 # Cores
 WHITE = (255, 255, 255)
@@ -146,9 +146,8 @@ while running:
             if index % COLS > 0:  # Se a célula à esquerda existe
                 cells[index - 1].sides[1] = True  # Desenha o lado direito da célula à esquerda
             next_turn = True  # Indica que é o próximo turno
-        res = ccell.checkwin(player)  # Verifica se a célula foi preenchida
-        
-
+       
+        points_this_turn = 0
         # Verifica se a célula atual ou as células adjacentes foram preenchidas
         res = ccell.checkwin(player) # Verifica se a célula foi preenchida
         if index - ROWS >= 0:  # Se a célula acima existe
@@ -160,6 +159,11 @@ while running:
         if index % COLS > 0:  # Se a célula à esquerda existe
             res += cells[index - 1].checkwin(player)  # Verifica se a célula à esquerda foi preenchida
 
+            # Após fechar os lados, verifique se a célula foi fechada e conte os pontos
+        for cell in cells:
+            points = cell.checkwin(player)
+            points_this_turn += points  # Acumula os pontos para este turno
+            
         if res:  # Se alguma célula foi preenchida
             fillcount += res  # Incrementa o contador de células preenchidas
             if player == 'X': p1_score += res  # Incrementa a pontuação do jogador 1

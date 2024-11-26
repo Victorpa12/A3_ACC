@@ -1,10 +1,6 @@
 from sys import argv
 from time import sleep
-#from tabuleiro import Tabuleiro
 import socket
-
-X_TAB = 5
-Y_TAB = 4
 
 SERVER_HOST = "localhost"
 SERVER_PORT = 1234
@@ -35,6 +31,7 @@ def trata_mensagem(data, addr):
         case "_":
             print("Não entendi a msg!")
             
+num_jogadores = 0
 
 def main(args):
 
@@ -52,6 +49,12 @@ def main(args):
             data, addr = skt.recvfrom(BUFFER_SIZE)
             if(data):
                 trata_mensagem(data, addr)
+
+            if num_jogadores >= 2:
+                print("Iniciando partida ...")
+                sleep(5)
+                print("Partida iniciada!")
+                num_jogadores = 0
 
 if __name__ == '__main__':
     main(argv)
