@@ -193,7 +193,7 @@ while running:
     if gameover:
         rect = pygame.Rect(30, 76, WIDTH - 70, HEIGHT - 150)  # Define o retângulo da mensagem de fim de jogo
         pygame.draw.rect(win, BLACK, rect)  # Desenha o retângulo da mensagem
-        pygame.draw.rect(win, RED, rect, 2)  # Desenha a borda do retângulo
+        pygame.draw.rect(win, WHITE, rect, 2)  # Desenha a borda do retângulo
 
         over = font.render('Fim de Jogo', True, WHITE)  # Renderiza o texto "Fim de Jogo"
         winner = '1' if p1_score > p2_score else '2'  # Define o vencedor
