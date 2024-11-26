@@ -1,4 +1,5 @@
 import socket
+import pygame
 
 HOST = '127.0.0.1'
 PORT = 3000
@@ -10,6 +11,11 @@ print(f"Servidor iniciado. Aguardando conexão em {HOST}:{PORT}...")
 conn, addr = s.accept()
 
 print(f"Conexão recebida de {addr}")
+
+
+
+
+
 
 while True:
     data = conn.recv(1024)
