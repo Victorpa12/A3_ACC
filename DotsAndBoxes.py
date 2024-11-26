@@ -191,7 +191,7 @@ while running:
 
     # Exibe mensagem de fim de jogo
     if gameover:
-        rect = pygame.Rect(50, 100, WIDTH - 50, HEIGHT - 100)  # Define o retângulo da mensagem de fim de jogo
+        rect = pygame.Rect(30, 76, WIDTH - 70, HEIGHT - 150)  # Define o retângulo da mensagem de fim de jogo
         pygame.draw.rect(win, BLACK, rect)  # Desenha o retângulo da mensagem
         pygame.draw.rect(win, RED, rect, 2)  # Desenha a borda do retângulo
 
