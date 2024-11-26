@@ -79,6 +79,7 @@ up, right, bottom, left = False, False, False, False  # Direções das teclas pr
 # Loop principal
 running = True
 while running:
+    
     win.fill(BLACK)  # Preenche a tela com a cor preta
     for event in pygame.event.get():  # Para cada evento
         if event.type == pygame.QUIT:  # Se o evento é para sair
@@ -118,6 +119,7 @@ while running:
         cell.update(win)  # Atualiza a célula
         if pos and cell.rect.collidepoint(pos):  # Se houve um clique e ele está dentro da célula
             ccell = cell  # Define a célula clicada
+        
 
     # Lógica para atualização de estados
     if ccell:
@@ -145,16 +147,31 @@ while running:
                 cells[index - 1].sides[1] = True  # Desenha o lado direito da célula à esquerda
             next_turn = True  # Indica que é o próximo turno
         res = ccell.checkwin(player)  # Verifica se a célula foi preenchida
-        if res:  # Se a célula foi preenchida
+        
+
+        # Verifica se a célula atual ou as células adjacentes foram preenchidas
+        res = ccell.checkwin(player) # Verifica se a célula foi preenchida
+        if index - ROWS >= 0:  # Se a célula acima existe
+            res += cells[index - ROWS].checkwin(player)  # Verifica se a célula acima foi preenchida
+        if (index + 1) % COLS > 0:  # Se a célula à direita existe
+            res += cells[index + 1].checkwin(player)  # Verifica se a célula à direita foi preenchida
+        if index + ROWS < len(cells):  # Se a célula abaixo existe
+            res += cells[index + ROWS].checkwin(player)  # Verifica se a célula abaixo foi preenchida
+        if index % COLS > 0:  # Se a célula à esquerda existe
+            res += cells[index - 1].checkwin(player)  # Verifica se a célula à esquerda foi preenchida
+
+        if res:  # Se alguma célula foi preenchida
             fillcount += res  # Incrementa o contador de células preenchidas
-            if player == 'X': p1_score += 1  # Incrementa a pontuação do jogador 1
-            else: p2_score += 1  # Incrementa a pontuação do jogador 2
+            if player == 'X': p1_score += res  # Incrementa a pontuação do jogador 1
+            else: p2_score += res  # Incrementa a pontuação do jogador 2
             if fillcount == ROWS * COLS:  # Se todas as células foram preenchidas
                 gameover = True  # Indica que o jogo acabou
-        if next_turn:  # Se é o próximo turno
+        
+        if next_turn and not res:  # Se é o próximo turno e nenhuma célula foi preenchida
             turn = (turn + 1) % len(players)  # Alterna o turno
             player = players[turn]  # Alterna o jogador
             next_turn = False  # Reseta a indicação de próximo turno
+        
 
     # Mostra pontuação
     p1img = font.render(f'Jogador 1: {p1_score}', True, BLUE)  # Renderiza a pontuação do jogador 1
