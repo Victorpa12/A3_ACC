@@ -1,6 +1,7 @@
 from sys import argv
 import socket
 from time import sleep
+from DotsAndBoxes import dotsandboxes
 
 HOST = '127.0.0.1'
 PORT = 4000
@@ -28,16 +29,18 @@ def trata_mensagem(data, addr):
 
 def playerAddr (index):
     playerData = fila_espera[index].split(':')
-    player = playerData[0]
-    nome = playerData[1]
     paddr = playerData[2]
-    print(f"Jogador {player} - {nome} - {paddr}")
     addr9 = paddr.split("('")
     addr0 = addr9[1].split(')')
     playeraddr = addr0[0].split("',")
     addr = (playeraddr[0], int(playeraddr[1]))
     print(addr)
     return addr
+
+def playerName (index):
+    playerData = fila_espera[index].split(':')
+    nome = playerData[1]
+    return nome
 
 
 
@@ -50,7 +53,7 @@ def main(args):
         
 
         while True:
-            num_jogadores = len(fila_espera)
+            num_jogadores = len(fila_espera)+1
             print(f"Servidor UDP iniciado. Aguardando dados em {HOST}:{PORT}...")
             
             
@@ -64,11 +67,14 @@ def main(args):
                 trata_mensagem(data, addr)
                 playerAddr(0)
                 res = "sua partida vai começar"
-            if (num_jogadores+1) %2 == 0:
+            if num_jogadores >= 2:
                 print("Iniciando partida ...")
                 sleep(5)
                 print("Partida iniciada!")
                 s.sendto(res.encode(), playerAddr(0))
+                s.sendto(res.encode(), playerAddr(1))
+                dotsandboxes()
+                fila_espera.clear()
 
                 
                 
