@@ -2,7 +2,7 @@ import socket  # Importa o módulo socket, que permite a comunicação de rede.
 
 # Define o endereço do servidor e a porta que será utilizada para a comunicação.
 SERVER_HOST = "localhost"
-SERVER_PORT = 1234
+SERVER_PORT = 4000
 
 # Define o tamanho do buffer para a recepção de dados.
 BUFFER_SIZE = 1024
