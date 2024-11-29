@@ -1,7 +1,21 @@
 from sys import argv
 import socket
+import pygame
 from time import sleep
-from DotsAndBoxes import dotsandboxes
+
+SCREEN = WIDTH, HEIGHT = 300, 300  # Dimensões da tela
+CELLSIZE = 40  # Tamanho de cada célula
+PADDING = 20  # Espaçamento
+# Cores
+WHITE = (255, 255, 255)
+RED = (252, 91, 122)
+BLUE = (78, 193, 246)
+GREEN = (0, 255, 0)
+BLACK = (12, 12, 12)
+ROWS = COLS = (WIDTH - 4 * PADDING) // CELLSIZE  # Número de linhas e colunas
+
+
+font = pygame.font.SysFont('cursive', 25)  # Define a fonte
 
 HOST = '127.0.0.1'
 PORT = 4000
@@ -77,7 +91,7 @@ def main(args):
                 trata_mensagem(data, addr)
                 
             if len(fila_espera) == 2:
-                res = f"2:A partida {party} vai começar"
+                res = f":A partida {party} vai começar"
                 
                 print("Iniciando partida ...")
                 sleep(3)
@@ -87,21 +101,59 @@ def main(args):
                 fila_espera.clear()
                 party += 1
 
-                
-                
+
+
 
                 
+def create_cells():
+    return [Cell(r, c) for r in range(ROWS) for c in range(COLS)]  # Cria uma lista de células
 
-# while True:
-#     # data = conn.recv(1024)
-#     # decData = data.decode()
-#     # dados = decData.split(':')
+def reset_game():
+    cells = create_cells()  # Cria as células
+    fillcount = 0  # Contador de células preenchidas
+    p1_score = 0  # Pontuação do jogador 1
+    p2_score = 0  # Pontuação do jogador 2
+    players = ['X', 'O']  # Lista de jogadores
+    turn = 0  # Turno atual
+    player = players[turn]  # Jogador atual
+    next_turn = False  # Indica se é o próximo turno
+    return cells, fillcount, p1_score, p2_score, players, turn, player, next_turn  # Retorna as variáveis do jogo
 
-#     # i = int(dados[0])
-#     # msg = dados[1]
-#     i = 0
-#     if i > 10:
-#         break
+class Cell:
+    def __init__(self, r, c):
+        self.r = r  # Linha da célula
+        self.c = c  # Coluna da célula
+        self.index = self.r * ROWS + self.c  # Índice único da célula
+        self.rect = pygame.Rect((self.c * CELLSIZE + 2 * PADDING, 
+                                self.r * CELLSIZE + 3 * PADDING, 
+                                CELLSIZE, CELLSIZE))  # Retângulo que representa a célula
+        self.edges = [  # Coordenadas das bordas da célula
+            [(self.rect.left, self.rect.top), (self.rect.right, self.rect.top)],
+            [(self.rect.right, self.rect.top), (self.rect.right, self.rect.bottom)],
+            [(self.rect.right, self.rect.bottom), (self.rect.left, self.rect.bottom)],
+            [(self.rect.left, self.rect.bottom), (self.rect.left, self.rect.top)]
+        ]
+        self.sides = [False, False, False, False]  # Lados da célula (se foram desenhados ou não)
+        self.winner = None  # Vencedor da célula (se todos os lados foram desenhados)
+
+    def checkwin(self, winner):
+        if not self.winner:  # Se a célula ainda não tem um vencedor
+            if self.sides == [True] * 4:  # Se todos os lados foram desenhados
+                self.winner = winner  # Define o vencedor
+                self.color = GREEN if winner == 'X' else RED  # Define a cor com base no vencedor
+                self.text = font.render(self.winner, True, WHITE)  # Renderiza o texto do vencedor
+                return 1  # Retorna 1 indicando que a célula foi preenchida
+        return 0  # Retorna 0 se a célula não foi preenchida
+
+    def update(self, win):
+        if self.winner:  # Se a célula tem um vencedor
+            pygame.draw.rect(win, self.color, self.rect)  # Desenha o retângulo da célula
+            win.blit(self.text, (self.rect.centerx - 5, self.rect.centery - 7))  # Desenha o texto do vencedor
+        for index, side in enumerate(self.sides):  # Para cada lado da célula
+            if side:  # Se o lado foi desenhado
+                pygame.draw.line(win, WHITE, self.edges[index][0], self.edges[index][1], 2)  # Desenha a linha do lado
+
+                
 
 if __name__ == '__main__':
     main(argv)
