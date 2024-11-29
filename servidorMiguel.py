@@ -12,14 +12,23 @@ def trata_mensagem(data, addr):
 
     msg = data.decode()
     dados = msg.split(':')
-
     cod = int(dados[0])
-    nome = dados[1]
+    
     
     match cod:
         case 1:
-            
+            nome = dados[1]
             fila_espera.append(f"{len(fila_espera)+1}: {nome} : {addr}")
+        
+        case 2:
+            quit = bool(dados[1])
+            reset = bool(dados[2])
+            pos = dados[3]
+            up = bool(dados[4])
+            right = bool(dados[5])
+            bottom = bool(dados[6])
+            left = bool(dados[7])
+            
             
         case "_":
             print("Não entendi a msg!")
@@ -51,9 +60,9 @@ def main(args):
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.bind((HOST, PORT))
         
-
+        party = 1
         while True:
-            num_jogadores = len(fila_espera)+1
+            num_jogadores = len(fila_espera)
             print(f"Servidor UDP iniciado. Aguardando dados em {HOST}:{PORT}...")
             
             
@@ -64,17 +73,19 @@ def main(args):
             print(f"Conexão recebida de {addr}")
             
             if(data):
+                
                 trata_mensagem(data, addr)
-                playerAddr(0)
-                res = "sua partida vai começar"
-            if num_jogadores >= 2:
+                
+            if len(fila_espera) == 2:
+                res = f"2:A partida {party} vai começar"
+                
                 print("Iniciando partida ...")
-                sleep(5)
+                sleep(3)
                 print("Partida iniciada!")
                 s.sendto(res.encode(), playerAddr(0))
                 s.sendto(res.encode(), playerAddr(1))
-                dotsandboxes()
                 fila_espera.clear()
+                party += 1
 
                 
                 
