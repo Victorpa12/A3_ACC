@@ -46,8 +46,10 @@ def update(self, win):
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-#msg =(f"1:{input('Digite seu nome: ')}") 
+#msg =(f"1:{input('Digite seu nome: ')}")
+#player =  (f"1:{input('player(1, 2): ')}")
 msg = "1:João"
+player = "1"
 s.sendto(msg.encode(), (HOST, PORT))
 data = s.recv(1024)
 if data:
