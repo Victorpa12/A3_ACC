@@ -179,8 +179,8 @@ while running:
         
 
     # Mostra pontuação
-    p1img = font.render(f'Player 1: {p1_score}', True, BLUE)  # Renderiza a pontuação do jogador 1
-    p2img = font.render(f'Player 2: {p2_score}', True, BLUE)  # Renderiza a pontuação do jogador 2
+    p1img = font.render(f'Jogador 1: {p1_score}', True, BLUE)  # Renderiza a pontuação do jogador 1
+    p2img = font.render(f'Jogador 2: {p2_score}', True, BLUE)  # Renderiza a pontuação do jogador 2
     win.blit(p1img, (2 * PADDING, 15))  # Desenha a pontuação do jogador 1 na tela
     win.blit(p2img, (WIDTH - 2 * PADDING - p2img.get_width(), 15))  # Desenha a pontuação do jogador 2 na tela
 
